@@ -62,6 +62,13 @@ rtk pnpm build
 ## 数据库约束
 
 - 不要在模块顶层初始化 Neon、Drizzle、Redis 或第三方 SDK 客户端；必须使用懒加载 getter。
+- 所有涉及数据库的代码必须强制走三层架构：`controller -> service -> dao`。
+  - `dao` 层固定放在 `lib/dao/**`，是唯一允许导入 `getSql()`、编写 SQL、访问数据库表的业务代码位置。
+  - `service` 层固定放在 `lib/services/**`，负责业务规则、权限语义、会话逻辑、审计编排和跨 DAO 组合；不得读取 `FormData`、直接操作 Cookie、调用 `redirect()` 或返回 UI 状态。
+  - `controller` 层固定放在 `lib/controllers/**`，所有 Server Actions、Route Handler 委托函数和请求入口控制逻辑都必须放在这里；只负责解析请求、读取 headers/cookies、设置/删除 Cookie、redirect、调用 service；不得导入 `getSql()` 或直接写 SQL。
+  - `app/**` 目录只放页面、布局和 UI 组合，不新建 `actions.ts` 承载 controller；页面或组件需要提交表单时，直接从 `lib/controllers/**` 导入对应 Server Action。
+  - `lib/db.ts` 只作为数据库基础设施封装存在，不承载业务查询。
+  - 新增后台内容管理、登录、消息状态更新等数据库功能时，必须先建/复用 DAO，再由 service 编排，最后由 controller 暴露入口；禁止从 Server Action、组件、页面或工具函数绕过 DAO 直连数据库。
 - 推荐封装 `lib/db.ts`：
 
 ```ts
@@ -153,15 +160,17 @@ password_hash = crypt($plain_password, password_hash)
 
 ```text
 app/login/page.tsx
-app/login/actions.ts
 app/admin/layout.tsx
 app/admin/page.tsx
 app/admin/**/page.tsx
 lib/db.ts
+lib/controllers/**/*
+lib/dao/**/*
+lib/services/**/*
+lib/http/request-context.ts
 lib/auth/session.ts
 lib/auth/password.ts
 lib/auth/guards.ts
-lib/admin/audit.ts
 proxy.ts
 ```
 

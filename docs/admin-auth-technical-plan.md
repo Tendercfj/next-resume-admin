@@ -45,6 +45,16 @@
 | `/admin/certifications` | 维护 `certifications` | owner/editor |
 | `/admin/messages` | 查看和更新 `contact_messages.status` | owner/editor/viewer |
 
+### 3.1 强制三层架构
+
+所有涉及数据库的接口必须按 `controller -> service -> dao` 分层，不允许在 Server Action、页面组件、布局或普通工具函数中直接写 SQL。
+
+- `dao` 层：固定放在 `lib/dao/**`，只负责 SQL、参数化查询和数据库返回行映射；是唯一允许导入 `getSql()` 的业务层。
+- `service` 层：固定放在 `lib/services/**`，负责登录、会话、锁定、审计、权限等业务规则编排；只能调用 DAO 或其他 service，不处理 `FormData`、Cookie、`redirect()` 和 UI 状态。
+- `controller` 层：固定放在 `lib/controllers/**`，所有 Server Actions、Route Handler 委托函数和请求入口控制逻辑都必须放在这里；负责解析请求、读取 headers/cookies、设置/删除 Cookie、重定向和调用 service，不得导入 `getSql()`。
+- `app/**` 目录只放页面、布局和 UI 组合，不新建 `actions.ts` 承载 controller；页面或组件需要提交表单时，直接从 `lib/controllers/**` 导入对应 Server Action。
+- `lib/db.ts` 只保留 Neon 懒加载基础设施，不写具体业务查询。
+
 ## 4. 登录设计
 
 ### 4.1 账号与密码
@@ -105,22 +115,29 @@ resume_admin_session
 
 ```text
 app/login/page.tsx
-app/login/actions.ts
 app/admin/layout.tsx
 app/admin/page.tsx
 app/admin/**/page.tsx
 lib/db.ts
+lib/controllers/admin-auth-controller.ts
+lib/dao/admin-users-dao.ts
+lib/dao/admin-sessions-dao.ts
+lib/dao/admin-audit-logs-dao.ts
+lib/services/admin-auth-service.ts
+lib/services/admin-audit-service.ts
+lib/http/request-context.ts
 lib/auth/session.ts
 lib/auth/password.ts
 lib/auth/guards.ts
-lib/admin/audit.ts
 proxy.ts
 ```
 
 关键约束：
 
 - `lib/db.ts` 使用懒加载 `getSql()`，不要在模块顶层初始化 Neon 客户端。
-- `/login` 用 Server Action 处理表单提交并设置 Cookie。
+- 只有 `lib/dao/**` 可以调用 `getSql()` 或编写 SQL；登录、退出、会话校验和审计写入都必须经由 service 调 DAO。
+- `/login` 使用 `lib/controllers/**` 中的 Server Action 处理表单提交并设置 Cookie。
+- `app/**` 不放 controller，不新增 `actions.ts`；表单、按钮、页面和布局直接导入 `lib/controllers/**`。
 - `app/admin/layout.tsx` 调用 `requireAdmin()`；无有效会话时 `redirect('/login')`。
 - `proxy.ts` 只做乐观检查，例如没有 session Cookie 时把 `/admin/*` 重定向到 `/login`；不要在 Proxy 里查数据库。
 - 所有后台写入 Server Actions 必须重新调用 `requireAdmin()`，不能只依赖页面层保护。
@@ -151,9 +168,9 @@ proxy.ts
 2. 再执行 `database/neon-admin-auth.sql`。
 3. 按 SQL 注释插入第一个 `owner` 管理员，并立即替换强密码。
 4. 安装并接入 `@neondatabase/serverless`。
-5. 实现 `getSql()`、登录 Server Action、会话校验、退出登录。
+5. 实现 `getSql()`，并按 DAO + service + controller 三层拆分登录、会话校验、退出登录和审计。
 6. 实现 `/admin` 受保护布局和基础管理页面。
-7. 所有后台 mutation 加 `requireAdmin()`、字段校验、审计日志。
+7. 所有后台 mutation 加 `requireAdmin()`、角色授权、字段校验、审计日志，且数据库访问只能经过 DAO。
 8. 根据公开简历项目缓存方式，选择动态读取或跨项目 revalidate。
 
 ## 9. 验收标准

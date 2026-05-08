@@ -1,9 +1,9 @@
 import type { ReactNode } from "react"
 import { LogOutIcon, ShieldCheckIcon } from "lucide-react"
 
-import { logoutAction } from "@/app/admin/actions"
 import { Button } from "@/components/ui/button"
 import { requireAdmin } from "@/lib/auth/guards"
+import { logoutAction } from "@/lib/controllers/admin-auth-controller"
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
   const admin = await requireAdmin()

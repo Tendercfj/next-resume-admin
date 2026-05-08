@@ -3,7 +3,6 @@
 import { useActionState } from "react"
 import { CircleAlertIcon, LogInIcon } from "lucide-react"
 
-import { loginAction, type LoginFormState } from "@/app/login/actions"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import {
@@ -14,6 +13,10 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
+import {
+  loginAction,
+  type LoginFormState,
+} from "@/lib/controllers/admin-auth-controller"
 
 const initialState: LoginFormState = {
   message: "",
