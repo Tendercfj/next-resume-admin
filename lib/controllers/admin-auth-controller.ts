@@ -27,6 +27,7 @@ function readString(value: FormDataEntryValue | null) {
 function validateLoginForm(formData: FormData) {
   const email = readString(formData.get("email")).toLowerCase()
   const password = readString(formData.get("password"))
+  const nextPath = normalizeAdminNextPath(readString(formData.get("next")))
   const fieldErrors: LoginFormState["fieldErrors"] = {}
 
   if (!email) {
@@ -44,8 +45,27 @@ function validateLoginForm(formData: FormData) {
   return {
     email,
     password,
+    nextPath,
     fieldErrors,
     isValid: Object.keys(fieldErrors).length === 0,
+  }
+}
+
+function normalizeAdminNextPath(value: string) {
+  if (!value || value.startsWith("//") || !value.startsWith("/admin")) {
+    return "/admin"
+  }
+
+  try {
+    const url = new URL(value, "https://admin.local")
+
+    if (url.origin !== "https://admin.local") {
+      return "/admin"
+    }
+
+    return `${url.pathname}${url.search}${url.hash}`
+  } catch {
+    return "/admin"
   }
 }
 
@@ -53,7 +73,8 @@ export async function loginAction(
   _prevState: LoginFormState,
   formData: FormData
 ): Promise<LoginFormState> {
-  const { email, password, fieldErrors, isValid } = validateLoginForm(formData)
+  const { email, password, nextPath, fieldErrors, isValid } =
+    validateLoginForm(formData)
 
   if (!isValid) {
     return {
@@ -81,7 +102,7 @@ export async function loginAction(
   }
 
   if (shouldRedirect) {
-    redirect("/admin")
+    redirect(nextPath)
   }
 
   return {

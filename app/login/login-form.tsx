@@ -22,7 +22,11 @@ const initialState: LoginFormState = {
   message: "",
 }
 
-export function LoginForm() {
+type LoginFormProps = {
+  nextPath: string
+}
+
+export function LoginForm({ nextPath }: LoginFormProps) {
   const [state, formAction, pending] = useActionState(
     loginAction,
     initialState
@@ -33,6 +37,8 @@ export function LoginForm() {
 
   return (
     <form action={formAction} className="flex flex-col gap-5">
+      <input type="hidden" name="next" value={nextPath} />
+
       <FieldGroup>
         <Field data-invalid={Boolean(emailError)}>
           <FieldLabel htmlFor="email">管理员邮箱</FieldLabel>

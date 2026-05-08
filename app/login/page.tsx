@@ -18,11 +18,29 @@ export const metadata: Metadata = {
   description: "next-resume-admin 后台登录",
 }
 
-export default async function LoginPage() {
+type LoginPageProps = {
+  searchParams: Promise<{
+    next?: string | string[]
+  }>
+}
+
+function getSafeNextPath(next: string | string[] | undefined) {
+  const nextPath = Array.isArray(next) ? next[0] : next
+
+  if (!nextPath || nextPath.startsWith("//") || !nextPath.startsWith("/admin")) {
+    return "/admin"
+  }
+
+  return nextPath
+}
+
+export default async function LoginPage({ searchParams }: LoginPageProps) {
+  const { next } = await searchParams
+  const nextPath = getSafeNextPath(next)
   const admin = await getCurrentAdmin()
 
   if (admin) {
-    redirect("/admin")
+    redirect(nextPath)
   }
 
   return (
@@ -74,7 +92,7 @@ export default async function LoginPage() {
             <CardDescription>请输入管理员邮箱和密码</CardDescription>
           </CardHeader>
           <CardContent>
-            <LoginForm />
+            <LoginForm nextPath={nextPath} />
           </CardContent>
           <CardFooter>
             <p className="text-sm text-muted-foreground">
