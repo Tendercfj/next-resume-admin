@@ -60,7 +60,7 @@ export const ADMIN_SECTION_ITEMS: AdminNavItem[] = [
     permission: "owner / editor",
     allowedRoles: ["owner", "editor"],
     checklist: ["主档表单", "发布状态", "基础校验"],
-    status: "planned",
+    status: "ready",
   },
   {
     id: "links",
