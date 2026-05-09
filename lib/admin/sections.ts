@@ -72,7 +72,7 @@ export const ADMIN_SECTION_ITEMS: AdminNavItem[] = [
     permission: "owner / editor",
     allowedRoles: ["owner", "editor"],
     checklist: ["URL 校验", "排序控制", "启停状态"],
-    status: "planned",
+    status: "ready",
   },
   {
     id: "skills",
@@ -84,7 +84,7 @@ export const ADMIN_SECTION_ITEMS: AdminNavItem[] = [
     permission: "owner / editor",
     allowedRoles: ["owner", "editor"],
     checklist: ["分组管理", "技能条目", "展示排序"],
-    status: "planned",
+    status: "ready",
   },
   {
     id: "work",
@@ -96,7 +96,7 @@ export const ADMIN_SECTION_ITEMS: AdminNavItem[] = [
     permission: "owner / editor",
     allowedRoles: ["owner", "editor"],
     checklist: ["时间范围", "成果要点", "当前职位"],
-    status: "planned",
+    status: "ready",
   },
   {
     id: "projects",
@@ -108,7 +108,7 @@ export const ADMIN_SECTION_ITEMS: AdminNavItem[] = [
     permission: "owner / editor",
     allowedRoles: ["owner", "editor"],
     checklist: ["项目表单", "技术标签", "精选状态"],
-    status: "planned",
+    status: "ready",
   },
   {
     id: "education",
@@ -120,7 +120,7 @@ export const ADMIN_SECTION_ITEMS: AdminNavItem[] = [
     permission: "owner / editor",
     allowedRoles: ["owner", "editor"],
     checklist: ["学校信息", "日期范围", "展示排序"],
-    status: "planned",
+    status: "ready",
   },
   {
     id: "certifications",
@@ -132,7 +132,7 @@ export const ADMIN_SECTION_ITEMS: AdminNavItem[] = [
     permission: "owner / editor",
     allowedRoles: ["owner", "editor"],
     checklist: ["证书信息", "凭证链接", "日期校验"],
-    status: "planned",
+    status: "ready",
   },
   {
     id: "messages",
@@ -144,7 +144,7 @@ export const ADMIN_SECTION_ITEMS: AdminNavItem[] = [
     permission: "owner / editor / viewer",
     allowedRoles: ["owner", "editor", "viewer"],
     checklist: ["消息列表", "状态筛选", "处理记录"],
-    status: "planned",
+    status: "ready",
   },
 ]
 
